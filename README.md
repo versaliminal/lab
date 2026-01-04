@@ -9,19 +9,19 @@
   {
     "Name": "warlock",
     "Cores": 16,
-    "StorageGB": 100,
+    "StorageTB": 1,
     "MemoryGB": 64
   },
   {
     "Name": "sorcerer",
     "Cores": 20,
-    "StorageGB": 100,
+    "StorageTB": 4,
     "MemoryGB": 48
   },
   {
     "Name": "wizard",
     "Cores": 22,
-    "StorageGB": 100,
+    "StorageTB": 4,
     "MemoryGB": 64
   }
 ]
@@ -32,7 +32,7 @@
 [
     {
         "Name": "SG1",
-        "StorageGB": 10000,
+        "StorageTB": 10,
         "Host": "warlock"
     }
 ]
