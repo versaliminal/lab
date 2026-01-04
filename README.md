@@ -3,26 +3,37 @@
 ## High-Level Diagram
 ![diagram](diagram.png)
 
-## Node Configurations
+## Compute Node Configurations
 ```
 [
   {
     "Name": "warlock",
     "Cores": 16,
-    "StorageGB": 96189.23828125,
-    "MemoryGB": 63723
+    "StorageGB": 100,
+    "MemoryGB": 64
   },
   {
     "Name": "sorcerer",
     "Cores": 20,
-    "StorageGB": 96189.23828125,
-    "MemoryGB": 47906.6796875
+    "StorageGB": 100,
+    "MemoryGB": 48
   },
   {
     "Name": "wizard",
     "Cores": 22,
-    "StorageGB": 96189.23828125,
-    "MemoryGB": 63884.09765625
+    "StorageGB": 100,
+    "MemoryGB": 64
   }
+]
+```
+
+## Storage Group Configurations
+```
+[
+    {
+        "Name": "SG1",
+        "StorageGB": 10000,
+        "Host": "warlock"
+    }
 ]
 ```
