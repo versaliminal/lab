@@ -4,7 +4,7 @@
 ![diagram](diagram.png)
 
 ## Compute Node Configurations
-```
+```json
 [
   {
     "Name": "warlock",
@@ -28,7 +28,7 @@
 ```
 
 ## Storage Group Configurations
-```
+```json
 [
     {
         "Name": "SG1",
@@ -37,3 +37,5 @@
     }
 ]
 ```
+## Physical Setup
+![lab](lab.jpg)
