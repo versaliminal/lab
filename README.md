@@ -1,7 +1,7 @@
 # VERSALIMINAL LAB
 
 ## High-Level Diagram
-![diagram](diagram.png)
+![diagram](docs/diagram.png)
 
 ## Compute Node Configurations
 ```json
@@ -38,4 +38,4 @@
 ]
 ```
 ## Physical Setup
-![lab](lab.jpg)
+![lab](docs/lab.jpg)
