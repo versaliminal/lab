@@ -1,0 +1,11 @@
+---
+talos-tailscale:
+  id: 4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b
+  build: factory.talos.dev/metal-installer/4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b:v1.12.1
+  iso: https://factory.talos.dev/image/4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b/v1.12.1/metal-amd64.iso
+fedora:
+  id: server-x86_64-43-1.6
+  iso: https://download.fedoraproject.org/pub/fedora/linux/releases/43/Server/x86_64/iso/Fedora-Server-dvd-x86_64-43-1.6.iso
+proxmox:
+  id: proxmox-ve_8.3-1
+  iso: No longer available from proxmox.com
