@@ -1,4 +1,12 @@
 ---
+network:
+  cidr_block: 192.168.5.0/24
+  default_gateway: 192.168.5.1
+  dhcp_pool:
+    start: 192.168.5.10
+    end: 192.168.5.140
+  wan:
+    ip: 192.168.1.38
 network_devices:
   - name: druid
     os: pfsense+
@@ -91,7 +99,8 @@ vms:
     role: worker
     ip: 192.168.5.220
 kubernetes:
-  - name: talos-primary
+  primary:
+    name: talos-primary
     type: talos
     control_plane: *talos_sorcerer
     workers:
