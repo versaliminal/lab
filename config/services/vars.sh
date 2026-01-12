@@ -1,0 +1,3 @@
+export HAOS_IP=192.168.5.212  	
+export TRUNAS_IP=192.168.5.211
+export FEDORA_VIP=100.124.29.45

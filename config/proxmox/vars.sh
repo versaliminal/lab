@@ -1,0 +1,3 @@
+export SORCERER_IP=192.168.5.159 	  	
+export WARLOCK_IP=192.168.5.153 	  	
+export WIZARD_IP=192.168.5.158
