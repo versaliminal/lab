@@ -1,14 +1,22 @@
 ---
 network:
-  cidr_block: 192.168.5.0/24
-  default_gateway: 192.168.5.1
-  dhcp_pool:
-    start: 192.168.5.10
-    end: 192.168.5.140
-  wan:
-    ip: 192.168.1.38
+  lab:
+    cidr_block: 192.168.5.0/24
+    default_gateway: 192.168.5.1
+    dhcp_pool:
+      start: 192.168.5.10
+      end: 192.168.5.140
+    wan:
+      ip: 192.168.1.38
+  home:
+    cidr_block: 192.168.1.0/24
+    default_gateway: 192.168.1.1
+    dhcp_pool:
+      start: 192.168.1.20
+      end: 192.168.1.254
 network_devices:
   - name: druid
+    network: lab
     os: pfsense+
     model: netgate-2100
     vip: 100.67.48.65
@@ -30,6 +38,10 @@ hosts:
       local_disk: 4TB
     deployment:
       image: proxmox
+    interfaces:
+      - network: lab
+        type: bridge
+        bridge: vmbr0
   - &warlock
     name: warlock
     os: proxmox
@@ -63,6 +75,13 @@ hosts:
               speed: 5400rpm
     deployment:
       image: proxmox
+    interfaces:
+      - network: lab
+        type: bridge
+        bridge: vmbr0
+      - network: home
+        type: bridge
+        bridge: vmbr1
   - &sorcerer
     name: sorcerer
     os: proxmox
@@ -76,6 +95,10 @@ hosts:
       local_disk: 4TB
     deployment:
       image: proxmox
+    interfaces:
+      - network: lab
+        type: bridge
+        bridge: vmbr0
 vms:
   - &truenas
     name: truenas
@@ -83,18 +106,20 @@ vms:
     forward: 192.168.1.38:8004
     deployment:
       image: truenas
+    bridge: vmbr0
   - name: fedora
     ip: 192.168.5.223
     vip: 100.124.29.45
     key: keys/fedora
     deployment:
       image: fedora
+    bridge: vmbr0
   - name: haos
-    ip: 192.168.5.212
+    ip: 192.168.1.52
     port: 8123
-    forward: 192.168.1.38:8123
     deployment:
       image: haos
+    bridge: vmbr1
   - &talos_sorcerer
     name: talos_sorcerer
     os: talos
@@ -102,6 +127,7 @@ vms:
     ip: 192.168.5.221
     deployment:
       image: talos-tailscale
+    bridge: vmbr0
   - &talos_warlock
     name: talos_warlock
     os: talos
@@ -109,6 +135,7 @@ vms:
     ip: 192.168.5.222
     deployment:
       image: talos-tailscale
+    bridge: vmbr0
   - &talos_wizard
     name: talos_wizard
     os: talos
@@ -116,6 +143,7 @@ vms:
     ip: 192.168.5.220
     deployment:
       image: talos-tailscale
+    bridge: vmbr0
 kubernetes:
   primary:
     name: talos-primary
