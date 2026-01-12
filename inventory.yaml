@@ -2,29 +2,49 @@
 networking:
   - name: druid
     os: pfsense+
+    model: netgate-2100
     vip: 100.67.48.65
     ip: 192.168.5.1
+    ports:
+      lan: 4xGbE
+      wan: 1xGbE
 hosts:
-  - name: wizard
+  - &wizard
+    name: wizard
     os: proxmox
     ip: 192.168.5.158
     key: keys/wizard
     ui-port: 8006
     forward: 192.168.1.38:8001
-  - name: warlock
+    resources:
+      cores: 22
+      mem: 64GB
+      local-disk: 4TB
+  - &warlock
+    name: warlock
     os: proxmox
     ip: 192.168.5.153
     key: keys/warlock
     ui-port: 8006
     forward: 192.168.1.38:8002
-  - name: sorcerer
+    resources:
+      cores: 16
+      mem: 64GB
+      local-disk: 4TB
+  - &sorcerer
+    name: sorcerer
     os: proxmox
     ip: 192.168.5.159
     key: keys/sorcerer
     ui-port: 8006
     forward: 192.168.1.38:8003
+    resources:
+      cores: 20
+      mem: 48GB
+      local-disk: 4TB
 vms:
-  - name: truenas
+  - &truenas
+    name: truenas
     ip: 192.168.5.211
     forward: 192.168.1.38:8004
   - name: fedora
@@ -58,3 +78,11 @@ kubernetes:
       - talos_warlock: *talos_warlock
       - talos_wizard: *talos_wizard
     kubeconfig: config/talos/kubeconfig
+storage-groups:
+  - name: "SG1"
+    storage: 10TB,
+    host: *warlock
+    owner: *truenas
+    protocol:
+      - nfs
+      - smb
