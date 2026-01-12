@@ -1,6 +1,17 @@
-source config/net/vars.sh
-source config/proxmox/vars.sh
-source config/services/vars.sh
-source config/talos/vars.sh
-
-ssh-add keys/fedora keys/wizard keys/warlock keys/sorcerer
+# hosts
+export wizard_ip=192.168.5.158
+export warlock_ip=192.168.5.153
+export sorcerer_ip=192.168.5.159
+# vms
+export truenas_ip=192.168.5.211
+export fedora_ip=192.168.5.223
+export haos_ip=192.168.5.212
+export talos_sorcerer_ip=192.168.5.221
+export talos_warlock_ip=192.168.5.222
+export talos_wizard_ip=192.168.5.220
+# k8s
+export KUBECONFIG=/Users/redx/Dev/lab/config/talos/kubeconfig
+# Keys
+ssh-add keys/wizard
+ssh-add keys/warlock
+ssh-add keys/sorcerer

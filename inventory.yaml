@@ -1,0 +1,60 @@
+---
+networking:
+  - name: druid
+    os: pfsense+
+    vip: 100.67.48.65
+    ip: 192.168.5.1
+hosts:
+  - name: wizard
+    os: proxmox
+    ip: 192.168.5.158
+    key: keys/wizard
+    ui-port: 8006
+    forward: 192.168.1.38:8001
+  - name: warlock
+    os: proxmox
+    ip: 192.168.5.153
+    key: keys/warlock
+    ui-port: 8006
+    forward: 192.168.1.38:8002
+  - name: sorcerer
+    os: proxmox
+    ip: 192.168.5.159
+    key: keys/sorcerer
+    ui-port: 8006
+    forward: 192.168.1.38:8003
+vms:
+  - name: truenas
+    ip: 192.168.5.211
+    forward: 192.168.1.38:8004
+  - name: fedora
+    ip: 192.168.5.223
+    vip: 100.124.29.45
+    key: keys/fedora
+  - name: haos
+    ip: 192.168.5.212
+    port: 8123
+    forward: 192.168.1.38:8123
+  - &talos_sorcerer
+    name: talos_sorcerer
+    os: talos
+    role: control-plane
+    ip: 192.168.5.221
+  - &talos_warlock
+    name: talos_warlock
+    os: talos
+    role: worker
+    ip: 192.168.5.222
+  - &talos_wizard
+    name: talos_wizard
+    os: talos
+    role: worker
+    ip: 192.168.5.220
+kubernetes:
+  - name: talos-cluster
+    type: talos
+    control-plane: *talos_sorcerer
+    workers:
+      - talos_warlock: *talos_warlock
+      - talos_wizard: *talos_wizard
+    kubeconfig: config/talos/kubeconfig

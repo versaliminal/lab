@@ -1,2 +1,0 @@
-export DRUID_VIP=100.67.48.65
-export DRUID_IP=192.168.5.1
