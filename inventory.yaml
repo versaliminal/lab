@@ -1,5 +1,5 @@
 ---
-networking:
+network_devices:
   - name: druid
     os: pfsense+
     model: netgate-2100
@@ -14,34 +14,54 @@ hosts:
     os: proxmox
     ip: 192.168.5.158
     key: keys/wizard
-    ui-port: 8006
+    ui_port: 8006
     forward: 192.168.1.38:8001
     resources:
       cores: 22
       mem: 64GB
-      local-disk: 4TB
+      local_disk: 4TB
   - &warlock
     name: warlock
     os: proxmox
     ip: 192.168.5.153
     key: keys/warlock
-    ui-port: 8006
+    ui_port: 8006
     forward: 192.168.1.38:8002
     resources:
       cores: 16
       mem: 64GB
-      local-disk: 4TB
+      local_disk: 4TB
+      disk_array:
+        - &warlock_array1
+          name: warlock_array1
+          passthrough: true
+          disks:
+            - type: WD Red Plus NAS HDD
+              size: 4TiB
+              speed: 5400rpm
+            - type: WD Red Plus NAS HDD
+              size: 4TiB
+              speed: 5400rpm
+            - type: WD Red Plus NAS HDD
+              size: 4TiB
+              speed: 5400rpm
+            - type: WD Red Plus NAS HDD
+              size: 4TiB
+              speed: 5400rpm
+            - type: WD Red Plus NAS HDD
+              size: 4TiB
+              speed: 5400rpm
   - &sorcerer
     name: sorcerer
     os: proxmox
     ip: 192.168.5.159
     key: keys/sorcerer
-    ui-port: 8006
+    ui_port: 8006
     forward: 192.168.1.38:8003
     resources:
       cores: 20
       mem: 48GB
-      local-disk: 4TB
+      local_disk: 4TB
 vms:
   - &truenas
     name: truenas
@@ -71,18 +91,29 @@ vms:
     role: worker
     ip: 192.168.5.220
 kubernetes:
-  - name: talos-cluster
+  - name: talos-primary
     type: talos
-    control-plane: *talos_sorcerer
+    control_plane: *talos_sorcerer
     workers:
-      - talos_warlock: *talos_warlock
-      - talos_wizard: *talos_wizard
+      - *talos_warlock
+      - *talos_wizard
     kubeconfig: config/talos/kubeconfig
-storage-groups:
+    config_dir: config/talos
+    talos_config: config/talos/talosconfig
+    patches:
+      - config/talos/tailscale.patch.yaml
+storage_groups:
   - name: "SG1"
+    type: raidz
     storage: 10TB,
     host: *warlock
+    disk_array: *warlock_array1
     owner: *truenas
-    protocol:
-      - nfs
-      - smb
+    shares:
+      nfs:
+        - name: shared
+          path: /mnt/SG1/shared
+      smb:
+        - name: shared
+        - name: backups
+        - name: timemachine
