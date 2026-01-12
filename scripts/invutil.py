@@ -1,3 +1,6 @@
+import argparse
+import os.path
+import urllib.request
 import yaml
 
 INVENTORY_FILE = 'inventory.yaml'
@@ -39,13 +42,45 @@ def writeNetworkDeviceConfigs(inventory, env_file):
     for device in devices:
         env_file.write(f"export {device['name']}_ip={device['ip']}\n")
 
-def main():
-    inventory = loadInventory()
+def createEnvFile(inventory):
     with open(ENV_FILE, 'w') as env_file:
         writeKubeConfig(inventory, env_file)
         writeHostConfigs(inventory, env_file)
         writeVMConfigs(inventory, env_file)
         writeNetworkDeviceConfigs(inventory, env_file)
+
+def pullImages(inventory):
+    try:
+        os.mkdir('images')
+    except FileExistsError:
+        pass
+    for key in inventory['images']:
+        entry = inventory['images'][key]
+        image = entry.get('image', "")
+        output = entry.get('file', "")
+        if output and os.path.exists(output):
+            print(f"Image already exists, skipping: entry={key}file={output}")
+            continue
+        if not image:
+            print(f"No image URL found, skipping: entry={key}")
+            continue
+        print(f"Pulling image: {image}")
+        urllib.request.urlretrieve(image, output)
+            
+
+def main():
+    parser = argparse.ArgumentParser(description='Lab inventory helper tool')
+    parser.add_argument('--env', help='Create an environment file', action='store_true')
+    parser.add_argument('--pull', help='Pull images', action='store_true')
+
+    args = parser.parse_args()
+    inventory = loadInventory()
+    if args.env:
+        print("Creating environment file...")
+        createEnvFile(inventory)
+    if args.pull:
+        print("Pulling images...")
+        pullImages(inventory)
 
 if __name__ == "__main__":
     main()

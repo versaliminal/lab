@@ -28,6 +28,8 @@ hosts:
       cores: 22
       mem: 64GB
       local_disk: 4TB
+    deployment:
+      image: proxmox
   - &warlock
     name: warlock
     os: proxmox
@@ -59,6 +61,8 @@ hosts:
             - type: WD Red Plus NAS HDD
               size: 4TiB
               speed: 5400rpm
+    deployment:
+      image: proxmox
   - &sorcerer
     name: sorcerer
     os: proxmox
@@ -70,34 +74,48 @@ hosts:
       cores: 20
       mem: 48GB
       local_disk: 4TB
+    deployment:
+      image: proxmox
 vms:
   - &truenas
     name: truenas
     ip: 192.168.5.211
     forward: 192.168.1.38:8004
+    deployment:
+      image: truenas
   - name: fedora
     ip: 192.168.5.223
     vip: 100.124.29.45
     key: keys/fedora
+    deployment:
+      image: fedora
   - name: haos
     ip: 192.168.5.212
     port: 8123
     forward: 192.168.1.38:8123
+    deployment:
+      image: haos
   - &talos_sorcerer
     name: talos_sorcerer
     os: talos
     role: control-plane
     ip: 192.168.5.221
+    deployment:
+      image: talos-tailscale
   - &talos_warlock
     name: talos_warlock
     os: talos
     role: worker
     ip: 192.168.5.222
+    deployment:
+      image: talos-tailscale
   - &talos_wizard
     name: talos_wizard
     os: talos
     role: worker
     ip: 192.168.5.220
+    deployment:
+      image: talos-tailscale
 kubernetes:
   primary:
     name: talos-primary
@@ -126,3 +144,25 @@ storage_groups:
         - name: shared
         - name: backups
         - name: timemachine
+images:
+  talos-tailscale:
+    id: 4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b
+    build: factory.talos.dev/metal-installer/4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b:v1.12.1
+    file: images/talos-1-12-1-metal-amd64.iso
+    image: https://factory.talos.dev/image/4a0d65c669d46663f377e7161e50cfd570c401f26fd9e7bda34a0216b6f1922b/v1.12.1/metal-amd64.iso
+  fedora:
+    id: server-x86_64-43-1.6
+    file: images/Fedora-Server-dvd-x86_64-43-1.6.iso
+    image: https://download.fedoraproject.org/pub/fedora/linux/releases/43/Server/x86_64/iso/Fedora-Server-dvd-x86_64-43-1.6.iso
+  proxmox:
+    id: proxmox-ve_8.3-1
+    image: ""
+    comment: No longer available from proxmox.com
+  haos:
+    id: x86-64-14.2
+    file: images/haos_generic-x86-64-14.2.img.xz
+    image: https://github.com/home-assistant/operating-system/releases/download/14.2/haos_generic-x86-64-14.2.img.xz
+  truenas:
+    id: TrueNAS-13.0-U6.7
+    image: ""
+    comment: No direct download link available
