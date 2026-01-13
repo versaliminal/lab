@@ -123,7 +123,7 @@ vms:
     deployment:
       image: haos
     bridge: vmbr1
-  - name: exit-node
+  - name: exit_node
     ip: dhcp
     key: keys/exit-node
     deployment:
