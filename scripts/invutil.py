@@ -5,6 +5,9 @@ import yaml
 
 INVENTORY_FILE = 'inventory.yaml'
 ENV_FILE = 'env.sh'
+HOSTS_FILE = 'hosts'
+LEAD_MARKER = '### BEGIN INVUTIL CONTENT'
+TAIL_MARKER = '### END INVUTIL CONTENT'
 
 def loadInventory():
     with open(INVENTORY_FILE, 'r') as file:
@@ -22,32 +25,37 @@ def writeKubeConfig(inventory, env_file):
     env_file.write(f"export talos_w1_ip={primary['workers'][0]['ip']}\n")
     env_file.write(f"export talos_w2_ip={primary['workers'][1]['ip']}\n")
 
-def writeHostConfigs(inventory, env_file):
+def writeHostConfigs(inventory, env_file, hosts_file):
     hosts = inventory['hosts']
     env_file.write('# Hosts\n')
     for host in hosts:
-        env_file.write(f"export {host['name']}_ip={host['ip']}\n")
-        if host['key']:
+        hosts_file.write(f"{host['ip']}\t{host['name']}\n")
+        if host.get('key', None):
             env_file.write(f"ssh-add {host['key']}\n")
 
-def writeVMConfigs(inventory, env_file):
+def writeVMConfigs(inventory, env_file, hosts_file):
     vms = inventory['vms']
-    env_file.write('# VMs\n')
+    hosts_file.write('# VMs\n')
     for vm in vms:
-        env_file.write(f"export {vm['name']}_ip={vm['ip']}\n")
+        if vm.get('ip', None) and vm['ip'].lower() != 'dhcp':
+            hosts_file.write(f"{vm['ip']}\t{vm['name']}\n")
+        if vm.get('key', None):
+            env_file.write(f"ssh-add {vm['key']}\n")
 
-def writeNetworkDeviceConfigs(inventory, env_file):
+def writeNetworkDeviceConfigs(inventory, hosts_file):
     devices = inventory.get('network_devices', [])
-    env_file.write('# Network Devices\n')
+    hosts_file.write('# Network Devices\n')
     for device in devices:
-        env_file.write(f"export {device['name']}_ip={device['ip']}\n")
+        hosts_file.write(f"{device['ip']}\t{device['name']}\n")
 
-def createEnvFile(inventory):
-    with open(ENV_FILE, 'w') as env_file:
+def createEnvFiles(inventory):
+    with open(ENV_FILE, 'w') as env_file, open(HOSTS_FILE, 'w') as hosts_file:
+        hosts_file.write(LEAD_MARKER + '\n')
         writeKubeConfig(inventory, env_file)
-        writeHostConfigs(inventory, env_file)
-        writeVMConfigs(inventory, env_file)
-        writeNetworkDeviceConfigs(inventory, env_file)
+        writeHostConfigs(inventory, env_file, hosts_file)
+        writeNetworkDeviceConfigs(inventory, hosts_file)
+        writeVMConfigs(inventory, env_file, hosts_file)
+        hosts_file.write(TAIL_MARKER + '\n')
 
 def pullImages(inventory):
     try:
@@ -67,7 +75,6 @@ def pullImages(inventory):
         print(f"Pulling image: {image}")
         urllib.request.urlretrieve(image, output)
             
-
 def main():
     parser = argparse.ArgumentParser(description='Lab inventory helper tool')
     parser.add_argument('--env', help='Create an environment file', action='store_true')
@@ -76,8 +83,8 @@ def main():
     args = parser.parse_args()
     inventory = loadInventory()
     if args.env:
-        print("Creating environment file...")
-        createEnvFile(inventory)
+        print("Creating env.sh and hosts file...")
+        createEnvFiles(inventory)
     if args.pull:
         print("Pulling images...")
         pullImages(inventory)
