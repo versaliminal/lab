@@ -42,6 +42,9 @@ hosts:
       - network: lab
         type: bridge
         bridge: vmbr0
+      - network: home
+        type: bridge
+        bridge: vmbr1
   - &warlock
     name: warlock
     os: proxmox
@@ -119,6 +122,12 @@ vms:
     port: 8123
     deployment:
       image: haos
+    bridge: vmbr1
+  - name: exit-node
+    ip: dhcp
+    key: keys/exit-node
+    deployment:
+      image: fedora
     bridge: vmbr1
   - &talos_sorcerer
     name: talos_sorcerer
