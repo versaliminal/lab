@@ -1,3 +1,17 @@
+inventory.private.yaml
+config/talos/kubeconfig
+config/talos/worker.yaml
+config/talos/controlplane.yaml
+config/talos/talosconfig
+config/ssh
+config/os/hosts
+config/shell/env.sh
+config/ansible/inventory.yaml
+lab-private.tar.zst*
+images/*.iso
+images/*.qcow2
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

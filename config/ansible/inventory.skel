@@ -1,0 +1,10 @@
+---
+machines:
+    hosts: {}
+    vars: {}
+vms:
+    hosts: {}
+    vars: {}
+network_devices:
+    hosts: {}
+    vars: {}

@@ -1,5 +1,5 @@
 ---
-network:
+networks:
   lab:
     cidr_block: 192.168.5.0/24
     default_gateway: 192.168.5.1
@@ -14,22 +14,50 @@ network:
     dhcp_pool:
       start: 192.168.1.20
       end: 192.168.1.254
+tailscale:
+  endpoints:
+    druid:
+      host: druid
+      routes:
+        - 192.168.5.0/24
+    exit-node:
+      host: exit-node
+      routes:
+        - 0.0.0.0/0
+    fedora:
+      host: fedora
 network_devices:
-  - name: druid
+  druid:
+    name: druid
+    type: gateway-router
     network: lab
     os: pfsense+
     model: netgate-2100
     vip: 100.67.48.65
-    ip: 192.168.5.1
+    primary_ip: 192.168.5.1
+    interfaces:
+      - network: lab
+        ip: 192.168.5.1
+        type: lan
+      - network: home
+        ip: 192.168.1.38
+        type: wan
     ports:
       lan: 4xGbE
       wan: 1xGbE
+  switch1:
+    name: switch1
+    type: switch
+    network: lab
+    os: unmanaged
+    model: dlink-DGS-108
+    ports:
+      total: 8xGbE
 hosts:
-  - &wizard
+  wizard: &wizard
     name: wizard
     os: proxmox
-    ip: 192.168.5.158
-    key: keys/wizard
+    primary_ip: 192.168.5.158
     ui_port: 8006
     forward: 192.168.1.38:8001
     resources:
@@ -40,16 +68,17 @@ hosts:
       image: proxmox
     interfaces:
       - network: lab
+        ip: 192.168.5.158
         type: bridge
         bridge: vmbr0
       - network: home
+        ip: 192.168.1.18
         type: bridge
         bridge: vmbr1
-  - &warlock
+  warlock: &warlock
     name: warlock
     os: proxmox
-    ip: 192.168.5.153
-    key: keys/warlock
+    primary_ip: 192.168.5.153
     ui_port: 8006
     forward: 192.168.1.38:8002
     resources:
@@ -80,16 +109,17 @@ hosts:
       image: proxmox
     interfaces:
       - network: lab
+        ip: 192.168.5.153
         type: bridge
         bridge: vmbr0
       - network: home
+        ip: 192.168.1.19
         type: bridge
         bridge: vmbr1
-  - &sorcerer
+  sorcerer: &sorcerer
     name: sorcerer
     os: proxmox
-    ip: 192.168.5.159
-    key: keys/sorcerer
+    primary_ip: 192.168.5.159
     ui_port: 8006
     forward: 192.168.1.38:8003
     resources:
@@ -100,59 +130,72 @@ hosts:
       image: proxmox
     interfaces:
       - network: lab
+        ip: 192.168.5.159
         type: bridge
         bridge: vmbr0
+      - netowrk: home
+        ip: 192.168.1.17
+        type: bridge
+        bridge: vmbr1
 vms:
-  - &truenas
+  truenas: &truenas
     name: truenas
-    ip: 192.168.5.211
+    primary_ip: 192.168.5.211
     forward: 192.168.1.38:8004
     deployment:
       image: truenas
-    bridge: vmbr0
-  - name: fedora
-    ip: 192.168.5.223
+    bridges:
+      - vmbr0
+  fedora:
+    name: fedora
+    primary_ip: 192.168.5.223
     vip: 100.124.29.45
-    key: keys/fedora
     deployment:
       image: fedora
-    bridge: vmbr0
-  - name: haos
-    ip: 192.168.1.52
+    bridges:
+      - vmbr0
+  haos:
+    name: haos
+    primary_ip: 192.168.1.52
     port: 8123
     deployment:
       image: haos
-    bridge: vmbr1
-  - name: exit-node
-    ip: dhcp
-    key: keys/exit-node
+    bridges:
+      - vmbr1
+  exit_node:
+    name: exit-node
+    primary_ip: 192.168.1.57
     deployment:
       image: fedora
-    bridge: vmbr1
-  - &talos_sorcerer
+    bridges:
+      - vmbr1
+  talos_sorcerer: &talos_sorcerer
     name: talos_sorcerer
     os: talos
     role: control-plane
-    ip: 192.168.5.221
+    primary_ip: 192.168.5.221
     deployment:
       image: talos-tailscale
-    bridge: vmbr0
-  - &talos_warlock
+    bridges:
+      - vmbr0
+  talos_warlock: &talos_warlock
     name: talos_warlock
     os: talos
     role: worker
-    ip: 192.168.5.222
+    primary_ip: 192.168.5.222
     deployment:
       image: talos-tailscale
-    bridge: vmbr0
-  - &talos_wizard
+    bridges:
+      - vmbr0
+  talos_wizard: &talos_wizard
     name: talos_wizard
     os: talos
     role: worker
-    ip: 192.168.5.220
+    primary_ip: 192.168.5.220
     deployment:
       image: talos-tailscale
-    bridge: vmbr0
+    bridges:
+      - vmbr0
 kubernetes:
   primary:
     name: talos-primary
@@ -167,7 +210,8 @@ kubernetes:
     patches:
       - config/talos/tailscale.patch.yaml
 storage_groups:
-  - name: "SG1"
+  sg1:
+    name: SG1
     type: raidz
     storage: 10TB,
     host: *warlock
