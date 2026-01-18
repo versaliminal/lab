@@ -1,0 +1,10 @@
+---
+helm_repos:
+  traefik:
+    crds:
+      - https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
+      - https://raw.githubusercontent.com/traefik/traefik/v3.5/docs/content/reference/dynamic-configuration/kubernetes-gateway-rbac.yml
+    url: https://traefik.github.io/charts
+    version: v35.0.1
+    vars: traefik.vars.yaml
+oci_repos: []
