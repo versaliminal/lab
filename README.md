@@ -24,4 +24,7 @@ Defined in the [inventory](inventory.yaml) file.
     3. run `pip install -r scripts/requirements.txt`
 4. run `scripts/init.sh` and enter the private archive password when prompted
 
-At this point you should have a fully up-to-date environment for the lab to start with
+At this point you should have a fully up-to-date environment for the lab to start with. To integrate the environment, do the following:
+
+1. Copy the contents of config/os/hosts into your system hosts file
+2. Source the shell environment: `source config/shell/env.sh`

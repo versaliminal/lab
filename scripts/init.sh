@@ -1,4 +1,8 @@
 #!/bin/bash
+ehco -e "\nPulling private lab files from remote..."
+echo "--------------------------------"
+url=$(yq ".private_archive.url" config.yml)
+wget $url -O lab-private.tar.zst.gpg
 echo -e "\nDecrypting private lab files..."
 echo "--------------------------------"
 gpg -o lab-private.tar.zst -d lab-private.tar.zst.gpg

@@ -1,0 +1,5 @@
+---
+version: 3
+
+includes:
+  upstream: config/kubernetes/upstream-helm/taskfile.yaml

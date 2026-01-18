@@ -1,0 +1,33 @@
+---
+version: 3
+
+vars:
+  BASE_DIR: config/kubernetes/upstream-helm
+  INFRA_NAMESPACE: infra
+
+tasks:
+  traefik:install:
+    vars:
+      url: https://traefik.github.io/charts
+      name: traefik
+      vars_file: traefik/vars.yaml
+      version: v35.0.1
+    cmds:
+      - kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
+      - kubectl apply -f https://raw.githubusercontent.com/traefik/traefik/v3.5/docs/content/reference/dynamic-configuration/kubernetes-gateway-rbac.yml
+      - helm repo add {{.name}} {{.url}}
+      - | 
+        helm upgrade --install "{{.name}}" "{{.name}}/{{.name}}" \
+        --version "{{.version}}" \
+        -n "{{.INFRA_NAMESPACE}}" \
+        --create-namespace \
+        -f "{{.BASE_DIR}}/{{.vars_file}}" \
+      - kubectl apply -f {{.BASE_DIR}}/traefik/gateway.yaml
+    desc: Install upstream Helm chart for Traefik with Gateway API
+  traefik:uninstall:
+    vars:
+      name: traefik
+    cmds:
+      - helm uninstall {{.name}} -n {{.INFRA_NAMESPACE}}
+      - kubectl delete -f {{.BASE_DIR}}/traefik/gateway.yaml
+    desc: Uninstall upstream Helm chart for Traefik with Gateway API
