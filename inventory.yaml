@@ -34,6 +34,7 @@ network_devices:
     network: lab
     os: pfsense+
     model: netgate-2100
+    dns: druid.versaliminal.org
     vip: 100.67.48.65
     primary_ip: 192.168.5.1
     interfaces:
@@ -179,6 +180,7 @@ vms:
     name: talos_sorcerer
     os: talos
     role: control-plane
+    dns: talos.sorcerer.versaliminal.org
     primary_ip: 192.168.5.221
     deployment:
       image: talos-tailscale
@@ -188,6 +190,7 @@ vms:
     name: talos_warlock
     os: talos
     role: worker
+    dns: talos.warlock.versaliminal.org
     primary_ip: 192.168.5.222
     deployment:
       image: talos-tailscale
@@ -197,6 +200,7 @@ vms:
     name: talos_wizard
     os: talos
     role: worker
+    dns: talos.wizard.versaliminal.org
     primary_ip: 192.168.5.220
     deployment:
       image: talos-tailscale
