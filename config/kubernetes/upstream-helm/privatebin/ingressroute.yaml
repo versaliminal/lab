@@ -1,0 +1,17 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: privatebin
+  namespace: infra
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`pb.versaliminal.org`)
+      kind: Rule
+      services:
+        - name: privatebin
+          port: 80
+  tls:
+    secretName: versaliminal-tls
+ #   certResolver: myresolver

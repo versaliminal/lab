@@ -1,4 +1,5 @@
 ---
+private_data_url: 
 networks:
   lab:
     cidr_block: 192.168.5.0/24
@@ -209,6 +210,11 @@ kubernetes:
     talos_config: config/talos/talosconfig
     patches:
       - config/talos/tailscale.patch.yaml
+    ingress:
+      type: traefik-gateway
+      external_ip: 192.168.5.220
+      service_hosts:
+        - pb.verssaliminal.org
 storage_groups:
   sg1:
     name: SG1

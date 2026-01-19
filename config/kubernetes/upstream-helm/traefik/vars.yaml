@@ -2,3 +2,13 @@
 providers:
   kubernetesGateway:
     enabled: true
+service:
+  externalIPs:
+    - 192.168.5.220
+#certificatesResolvers:
+#  myresolver:
+#    acme:
+#      email: quinn@versaliminal.org
+#      storage: acme.json
+#      httpChallenge:
+#        entryPoint: web

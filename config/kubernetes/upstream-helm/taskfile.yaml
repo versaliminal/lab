@@ -16,6 +16,7 @@ tasks:
       - kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
       - kubectl apply -f https://raw.githubusercontent.com/traefik/traefik/v3.5/docs/content/reference/dynamic-configuration/kubernetes-gateway-rbac.yml
       - helm repo add {{.name}} {{.url}}
+      - helm repo update
       - | 
         helm upgrade --install "{{.name}}" "{{.name}}/{{.name}}" \
         --version "{{.version}}" \
@@ -31,3 +32,22 @@ tasks:
       - helm uninstall {{.name}} -n {{.INFRA_NAMESPACE}}
       - kubectl delete -f {{.BASE_DIR}}/traefik/gateway.yaml
     desc: Uninstall upstream Helm chart for Traefik with Gateway API
+
+  privatebin:install:
+    vars:
+      url: https://privatebin.github.io/helm-chart
+      name: privatebin
+    cmds:
+      - helm repo add {{.name}} {{.url}}
+      - helm repo update
+      - helm upgrade --install {{.name}} {{.name}}/privatebin -n {{.INFRA_NAMESPACE}} --create-namespace
+      - kubectl -n {{.INFRA_NAMESPACE}} apply -f {{.BASE_DIR}}/privatebin/ingressroute.yaml
+    desc: Install upstream Helm chart for PrivateBin
+  privatebin:uninstall:
+    vars:
+      url: https://privatebin.github.io/helm-chart
+      name: privatebin
+    cmds:
+      - helm uninstall {{.name}} -n {{.INFRA_NAMESPACE}}
+      - kubectl -n {{.INFRA_NAMESPACE}} delete -f {{.BASE_DIR}}/privatebin/ingressroute.yaml
+    desc: Uninstall upstream Helm chart for PrivateBin

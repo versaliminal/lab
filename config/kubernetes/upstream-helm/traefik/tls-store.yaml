@@ -1,0 +1,10 @@
+apiVersion: traefik.io/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+  namespace: infra
+spec:
+  certificates:
+    - secretName: versaliminal-tls
+  defaultCertificate:
+    secretName: versaliminal-tls
