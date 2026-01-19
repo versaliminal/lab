@@ -18,13 +18,10 @@ Defined in the [inventory](inventory.yaml) file.
 ## Getting Started
 1. Request Tailscale access
 2. Request private archive access and download it to the root directory (you will also need the gpg passcode)
-3. Setup a python virtual environment
-    1. Run `python3 -m venv .venv`
-    2. Run `source .venv/bin/activate`
-    3. run `pip install -r scripts/requirements.txt`
-4. run `scripts/init.sh` and enter the private archive password when prompted
+3. Install (https://taskfile.dev/docs/installation)[taskfile] and (https://www.python.org/downloads/)[python] if not already installed
+4. Run `task init`
 
 At this point you should have a fully up-to-date environment for the lab to start with. To integrate the environment, do the following:
 
-1. Copy the contents of config/os/hosts into your system hosts file
-2. Source the shell environment: `source config/shell/env.sh`
+1. Copy the contents of config/os/hosts into your system hosts file if desired
+2. Source the shell environment: `source config/shell/env.sh` if desired
