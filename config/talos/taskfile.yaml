@@ -1,21 +1,18 @@
 version: 3
 
-vars:
-  CONFIG_DIR: config/talos
-
 tasks:
   setup:
     dotenv:
-      - config/talos/.env
+      - .env
     cmds:
-      - talosctl gen config talos-primary https://$talos_cp_ip:6443 --output-dir {{.CONFIG_DIR}}
-      - talosctl apply-config --insecure --nodes $talos_cp_ip --file {{.CONFIG_DIR}}/controlplane.yaml
+      - talosctl gen config talos-primary https://$talos_cp_ip:6443 --output-dir .
+      - talosctl apply-config --insecure --nodes $talos_cp_ip --file controlplane.yaml
       - sleep 30
       - talosctl config endpoint $talos_cp_ip
       - talosctl config node $talos_cp_ip
       - talosctl bootstrap
       - sleep 120
-      - talosctl apply-config --insecure --nodes $talos_w1_ip --file {{.CONFIG_DIR}}/worker.yaml
-      - talosctl apply-config --insecure --nodes $talos_w2_ip --file {{.CONFIG_DIR}}/worker.yaml
+      - talosctl apply-config --insecure --nodes $talos_w1_ip --file worker.yaml
+      - talosctl apply-config --insecure --nodes $talos_w2_ip --file worker.yaml
       - sleep 30
       - talosctl kubeconfig kubeconfig/talos-primary 

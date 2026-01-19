@@ -11,6 +11,9 @@ lab-private.tar.zst*
 images/*.iso
 images/*.qcow2
 .DS_Store
+*.csr
+*.crt
+*.key
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

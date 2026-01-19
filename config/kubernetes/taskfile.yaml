@@ -2,7 +2,6 @@
 version: 3
 
 vars:
-  BASE_DIR: config/kubernetes/upstream-helm
   INFRA_NAMESPACE: infra
 
 tasks:
@@ -22,15 +21,15 @@ tasks:
         --version "{{.version}}" \
         -n "{{.INFRA_NAMESPACE}}" \
         --create-namespace \
-        -f "{{.BASE_DIR}}/{{.vars_file}}" \
-      - kubectl apply -f {{.BASE_DIR}}/traefik/gateway.yaml
+        -f {{.vars_file}}" \
+      - kubectl apply -f traefik/gateway.yaml
     desc: Install upstream Helm chart for Traefik with Gateway API
   traefik:uninstall:
     vars:
       name: traefik
     cmds:
       - helm uninstall {{.name}} -n {{.INFRA_NAMESPACE}}
-      - kubectl delete -f {{.BASE_DIR}}/traefik/gateway.yaml
+      - kubectl delete -f traefik/gateway.yaml
     desc: Uninstall upstream Helm chart for Traefik with Gateway API
 
   privatebin:install:
@@ -41,7 +40,7 @@ tasks:
       - helm repo add {{.name}} {{.url}}
       - helm repo update
       - helm upgrade --install {{.name}} {{.name}}/privatebin -n {{.INFRA_NAMESPACE}} --create-namespace
-      - kubectl -n {{.INFRA_NAMESPACE}} apply -f {{.BASE_DIR}}/privatebin/ingressroute.yaml
+      - kubectl -n {{.INFRA_NAMESPACE}} apply -f privatebin/ingressroute.yaml
     desc: Install upstream Helm chart for PrivateBin
   privatebin:uninstall:
     vars:
@@ -49,5 +48,14 @@ tasks:
       name: privatebin
     cmds:
       - helm uninstall {{.name}} -n {{.INFRA_NAMESPACE}}
-      - kubectl -n {{.INFRA_NAMESPACE}} delete -f {{.BASE_DIR}}/privatebin/ingressroute.yaml
+      - kubectl -n {{.INFRA_NAMESPACE}} delete -f privatebin/ingressroute.yaml
     desc: Uninstall upstream Helm chart for PrivateBin
+  
+  tls:install:
+      desc: Install Kubernetes TLS secrets
+      cmds:
+        - kubectl create secret tls versaliminal-tls --cert=config/tls/versaliminal-entity.crt --key=config/tls/versaliminal-entity.key --namespace=infra
+  tls:uninstall:
+    desc: Uninstall Kubernetes TLS secrets
+    cmds:
+      - kubectl delete secret versaliminal-tls --namespace=infra

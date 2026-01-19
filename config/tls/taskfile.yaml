@@ -1,0 +1,27 @@
+---
+version: 3
+
+tasks:
+  generate:
+      vars:
+        days_valid: 999
+        subject: "/C=US/ST=TX/L=Austin/O=VERSALIMINAL/CN=*.versaliminal.org"
+        san: "subjectAltName=DNS:*.versaliminal.org,IP:192.168.5.220"
+      desc: Generate TLS certificates
+      cmds:
+        - | # Create CA cert
+          openssl req -nodes -x509 -sha256 -newkey rsa:4096 \
+          -keyout versaliminal-ca.key \
+          -out versaliminal-ca.csr \
+          -days {{.days_valid}} \
+          -subj "{{.subject}}" \
+          -addext "{{.san}}" \
+          -addext "basicConstraints=critical,CA:true"
+        - | # Create entity cert
+          openssl req -nodes -x509 -sha256 -newkey rsa:4096 \
+          -keyout versaliminal-entity.key \
+          -out versaliminal-entity.crt \
+          -days {{.days_valid}} \
+          -subj "{{.subject}}" \
+          -addext "{{.san}}" \
+          -addext "basicConstraints=CA:false"
