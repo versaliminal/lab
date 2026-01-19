@@ -7,7 +7,6 @@ import yaml
 INVENTORY_FILE = 'inventory.yaml'
 PRIV_INVENTORY_FILE = 'inventory.private.yaml'
 ENV_FILE = 'config/shell/env.sh'
-HOSTS_FILE = 'config/os/hosts'
 ANSIBLE_INV_FILE = 'config/ansible/inventory.yaml'
 KEY_PATH_FMT = os.path.abspath('config/ssh/{key_name}')
 LEAD_MARKER = '### BEGIN INVUTIL CONTENT'
@@ -57,10 +56,9 @@ def writeKubeConfig(inventory, env_file):
     env_file.write(f"export talos_w1_ip={primary['workers'][0]['primary_ip']}\n")
     env_file.write(f"export talos_w2_ip={primary['workers'][1]['primary_ip']}\n")
 
-def writeGenericConfigs(entry, env_file, hosts_file, ansible_inv, group_name):
+def writeGenericConfigs(entry, env_file, ansible_inv, group_name):
     record = {}
     if hasValidPrimaryIP(entry):
-        hosts_file.write(f"{entry['primary_ip']}\t{entry['name']}\n")
         record[ANSIBLE_HOST] = entry['primary_ip']
     if entry.get('key', None):
         key_file = KEY_PATH_FMT.format(key_name=entry['key'])
@@ -71,40 +69,35 @@ def writeGenericConfigs(entry, env_file, hosts_file, ansible_inv, group_name):
     if record != {}:
         ansible_inv[group_name]['hosts'][entry['name']] = record
 
-def writeHostConfigs(inventory, env_file, hosts_file, ansible_inv):
+def writeHostConfigs(inventory, env_file, ansible_inv):
     hosts = inventory.get('hosts', None)
     if not hosts:
         return
     env_file.write('# Hosts\n')
-    hosts_file.write('# Hosts\n')
     for host in hosts.values():
-        writeGenericConfigs(host, env_file, hosts_file, ansible_inv, ANSIBLE_MACHINE_GROUP)
+        writeGenericConfigs(host, env_file, ansible_inv, ANSIBLE_MACHINE_GROUP)
 
-def writeVMConfigs(inventory, env_file, hosts_file, ansible_inv):
+def writeVMConfigs(inventory, env_file, ansible_inv):
     vms = inventory.get('vms', None)
     if not vms:
         return
-    hosts_file.write('# VMs\n')
     for vm in vms.values():
-        writeGenericConfigs(vm, env_file, hosts_file, ansible_inv, ANSIBLE_VM_GROUP)
+        writeGenericConfigs(vm, env_file, ansible_inv, ANSIBLE_VM_GROUP)
 
-def writeNetworkDeviceConfigs(inventory, hosts_file, ansible_inv):
+def writeNetworkDeviceConfigs(inventory, ansible_inv):
     devices = inventory.get('network_devices', None)
     if not devices:
         return
-    hosts_file.write('# Network Devices\n')
     for device in devices.values():
-        writeGenericConfigs(device, None, hosts_file, ansible_inv, ANSIBLE_NETDEV_GROUP)
+        writeGenericConfigs(device, None, ansible_inv, ANSIBLE_NETDEV_GROUP)
 
 def createEnvFiles(inventory):
     ansible_inv = loadYaml(ANSIBLE_SKEL)
-    with openForWrite(ENV_FILE) as env_file, openForWrite(HOSTS_FILE) as hosts_file:
-        hosts_file.write(LEAD_MARKER + '\n')
+    with openForWrite(ENV_FILE) as env_file:
         writeKubeConfig(inventory, env_file)
-        writeHostConfigs(inventory, env_file, hosts_file, ansible_inv)
-        writeNetworkDeviceConfigs(inventory, hosts_file, ansible_inv)
-        writeVMConfigs(inventory, env_file, hosts_file, ansible_inv)
-        hosts_file.write(TAIL_MARKER + '\n')
+        writeHostConfigs(inventory, env_file, ansible_inv)
+        writeNetworkDeviceConfigs(inventory, ansible_inv)
+        writeVMConfigs(inventory, env_file, ansible_inv)
 
     with openForWrite(ANSIBLE_INV_FILE) as ansible_file:
         ansible_file.write(yaml.dump(ansible_inv))
