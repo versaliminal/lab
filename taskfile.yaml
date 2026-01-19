@@ -6,6 +6,14 @@ includes:
   talos: config/talos/taskfile.yaml
 
 tasks:
+  init:
+    desc: Initialize repository state
+    cmds:
+      - task private-files:unarchive
+      - python3 -m venv .venv
+      - .venv/bin/python3 -m pip install -r scripts/requirements.txt
+      - .venv/bin/python3 scripts/invutil.py --env
+
   tls:generate:
     vars:
       base_dir: config/tls
@@ -38,4 +46,27 @@ tasks:
     desc: Uninstall Kubernetes TLS secrets
     cmds:
       - kubectl delete secret versaliminal-tls --namespace=infra
+
+  archive:
+    desc: Archive lab files
+    vars:
+      tar_file: lab.tar.zst
+    cmds:
+      - tar --zstd -vf {{.tar_file}} --exclude .venv -c .
       
+  private-files:archive:
+    desc: Archive private lab files
+    vars:
+      tar_file: lab-private.tar.zst
+    cmds:
+      - tar --zstd -vf {{.tar_file}} -c config/ssh config/talos/ config/tls inventory.private.yaml
+      - gpg --symmetric --cipher-algo AES256 {{.tar_file}}
+      - rm {{.tar_file}}
+  private-files:unarchive:
+    desc: Unarchive private lab files
+    vars:
+      tar_file: lab-private.tar.zst
+    cmds:
+      - gpg --decrypt -o {{.tar_file}} {{.tar_file}}.gpg
+      - tar --zstd -xvf {{.tar_file}}
+      - rm {{.tar_file}}

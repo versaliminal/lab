@@ -58,6 +58,7 @@ hosts:
   wizard: &wizard
     name: wizard
     os: proxmox
+    dns: wizard.versaliminal.org
     primary_ip: 192.168.5.158
     ui_port: 8006
     forward: 192.168.1.38:8001
@@ -79,6 +80,7 @@ hosts:
   warlock: &warlock
     name: warlock
     os: proxmox
+    dns: warlock.versaliminal.org
     primary_ip: 192.168.5.153
     ui_port: 8006
     forward: 192.168.1.38:8002
@@ -120,6 +122,7 @@ hosts:
   sorcerer: &sorcerer
     name: sorcerer
     os: proxmox
+    dns: sorcerer.versaliminal.org
     primary_ip: 192.168.5.159
     ui_port: 8006
     forward: 192.168.1.38:8003
@@ -141,6 +144,8 @@ hosts:
 vms:
   truenas: &truenas
     name: truenas
+    os: truenas core
+    dns: nas.versaliminal.org
     primary_ip: 192.168.5.211
     forward: 192.168.1.38:8004
     deployment:
