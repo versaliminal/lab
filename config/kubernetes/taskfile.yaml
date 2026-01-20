@@ -5,15 +5,10 @@ vars:
   INFRA_NAMESPACE: infra
 
 tasks:
-  traefik:install:
-    vars:
-      url: https://traefik.github.io/charts
-      name: traefik
-      vars_file: traefik/vars.yaml
-      version: v35.0.1
+## Templates for Helm and Kubectl operations
+  helm:repo-install:
+    desc: Install Helm charts from repo
     cmds:
-      - kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
-      - kubectl apply -f https://raw.githubusercontent.com/traefik/traefik/v3.5/docs/content/reference/dynamic-configuration/kubernetes-gateway-rbac.yml
       - helm repo add {{.name}} {{.url}}
       - helm repo update
       - | 
@@ -22,35 +17,20 @@ tasks:
         -n "{{.INFRA_NAMESPACE}}" \
         --create-namespace \
         -f {{.vars_file}}" \
-      - kubectl apply -f traefik/gateway.yaml
-    desc: Install upstream Helm chart for Traefik with Gateway API
-  traefik:uninstall:
-    vars:
-      name: traefik
+  helm:uninstall:
+    desc: Uninstall Helm chart
     cmds:
       - helm uninstall {{.name}} -n {{.INFRA_NAMESPACE}}
-      - kubectl delete -f traefik/gateway.yaml
-    desc: Uninstall upstream Helm chart for Traefik with Gateway API
+  kubectl:apply:
+    desc: Apply Kubernetes manifest
+    cmds:
+      - kubectl apply -f {{.manifest_file}} -n {{.INFRA_NAMESPACE}}
+  kubectl:delete:
+    desc: Delete Kubernetes manifest
+    cmds:
+      - kubectl delete -f {{.manifest_file}} -n {{.INFRA_NAMESPACE}}
 
-  privatebin:install:
-    vars:
-      url: https://privatebin.github.io/helm-chart
-      name: privatebin
-    cmds:
-      - helm repo add {{.name}} {{.url}}
-      - helm repo update
-      - helm upgrade --install {{.name}} {{.name}}/privatebin -n {{.INFRA_NAMESPACE}} --create-namespace
-      - kubectl -n {{.INFRA_NAMESPACE}} apply -f privatebin/ingressroute.yaml
-    desc: Install upstream Helm chart for PrivateBin
-  privatebin:uninstall:
-    vars:
-      url: https://privatebin.github.io/helm-chart
-      name: privatebin
-    cmds:
-      - helm uninstall {{.name}} -n {{.INFRA_NAMESPACE}}
-      - kubectl -n {{.INFRA_NAMESPACE}} delete -f privatebin/ingressroute.yaml
-    desc: Uninstall upstream Helm chart for PrivateBin
-  
+## TLS Secrets
   tls:install:
       desc: Install Kubernetes TLS secrets
       cmds:
@@ -59,3 +39,53 @@ tasks:
     desc: Uninstall Kubernetes TLS secrets
     cmds:
       - kubectl delete secret versaliminal-tls --namespace=infra
+
+## PrivateBin
+  privatebin:install:
+    desc: Install PrivateBin
+    cmds:
+      - task: k8s:helm:repo-install
+        url: https://privatebin.github.io/helm-chart
+        name: privatebin
+        vars_file: privatebin/vars.yaml
+        version: 0.23.3
+  privatebin:uninstall:
+    desc: Uninstall PrivateBin
+    cmds:
+      - task: helm:uninstall
+        vars:
+          name: privatebin
+      - task: kubectl:delete
+        vars:
+          manifest_file: privatebin/ingressroute.yaml
+          
+
+## Traefik
+  traefik:install:
+    desc: Install upstream Helm chart for Traefik with Gateway API
+    cmds:
+      - task: kubectl:apply
+        vars:
+          manifest_file: https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
+      - task: kubectl:apply
+        vars:
+          manifest_file: https://raw.githubusercontent.com/traefik/traefik/v3.5/docs/content/reference/dynamic-configuration/kubernetes-gateway-rbac.yml
+      - task: helm:repo-install
+        vars:
+          url: https://traefik.github.io/charts
+          name: traefik
+          vars_file: traefik/vars.yaml
+          version: v35.0.1
+      - task: kubectl:apply
+        vars:
+          manifest_file: traefik/gateway.yaml
+  traefik:uninstall:
+    desc: Uninstall traefik
+    cmds:
+      - task: helm:uninstall
+        vars:
+          name: traefik
+      - task: kubectl:delete
+        vars:
+          manifest_file: traefik/gateway.yaml
+      
