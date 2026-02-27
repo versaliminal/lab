@@ -24,4 +24,4 @@ Defined in the [inventory](inventory.yaml) file.
 At this point you should have a fully up-to-date environment for the lab to start with. To integrate the environment, do the following:
 
 1. Copy the contents of config/os/hosts into your system hosts file if desired
-2. Source the shell environment: `source config/shell/env.sh` if desiredt
+2. Source the shell environment: `source config/shell/env.sh` if desired
